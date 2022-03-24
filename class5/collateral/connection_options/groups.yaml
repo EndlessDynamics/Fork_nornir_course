@@ -5,8 +5,9 @@ eos:
   connection_options:
     netmiko:
       platform: arista_eos
-      username: insecure
-      password: stillnotsecure
+      # "insecure" user is not configured on Arista devices so testing fails
+      # username: insecure
+      # password: stillnotsecure
       extras:
         global_delay_factor: 2 
         secret: verysecure

@@ -1,15 +1,15 @@
 from nornir import InitNornir
-from nornir.plugins.functions.text import print_result
-from nornir.plugins.tasks import networking
+from nornir_utils.plugins.functions import print_result
+from nornir_netmiko import netmiko_send_command
 
 
 def my_task(task):
-    if task.host.groups[0] == "ios":
+    if task.host.groups[0].name == "ios":
         cmd = "show run"
-        task.run(task=networking.netmiko_send_command, command_string=cmd)
-    elif task.host.groups[0] == "junos":
+        task.run(task=netmiko_send_command, command_string=cmd)
+    elif task.host.groups[0].name == "junos":
         cmd = "show configuration"
-        task.run(task=networking.netmiko_send_command, command_string=cmd)
+        task.run(task=netmiko_send_command, command_string=cmd)
 
 
 def main():

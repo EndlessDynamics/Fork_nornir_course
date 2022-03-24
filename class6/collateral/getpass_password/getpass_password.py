@@ -1,9 +1,11 @@
+import os
 from getpass import getpass
 from nornir import InitNornir
-from nornir.plugins.tasks import networking
+from nornir_netmiko import netmiko_send_command
 
 
-PASSWORD = getpass()
+# The environment variable is for automated testing (else use getpass())
+PASSWORD = os.getenv("NORNIR_PASSWORD") if os.getenv("NORNIR_PASSWORD") else getpass()
 
 
 def main():
@@ -12,7 +14,7 @@ def main():
     for hostname, host_obj in nr.inventory.hosts.items():
         host_obj.password = PASSWORD
     agg_result = nr.run(
-        task=networking.netmiko_send_command, command_string="show run | i hostname"
+        task=netmiko_send_command, command_string="show run | i hostname"
     )
     print(agg_result["arista1"].result)
 

@@ -1,6 +1,6 @@
 from nornir import InitNornir
-from nornir.plugins.functions.text import print_result
-from nornir.plugins.tasks.networking import netmiko_file_transfer
+from nornir_utils.plugins.functions import print_result
+from nornir_netmiko import netmiko_file_transfer
 
 
 def delete_file(task, filename):
@@ -34,19 +34,19 @@ def delete_file(task, filename):
 
 
 if __name__ == "__main__":
-    nr = InitNornir(config_file="config.yaml")
-    nr = nr.filter(name="nxos1")
+    with InitNornir(config_file="config.yaml") as nr:
+        nr = nr.filter(name="nxos1")
 
-    # Transfer test file to NX-OS devices
-    source_file = "bonus1_ex4.txt"
-    dest_file = source_file
-    agg_result = nr.run(
-        netmiko_file_transfer,
-        source_file=source_file,
-        dest_file=dest_file,
-        direction="put",
-    )
-    print_result(agg_result)
+        # Transfer test file to NX-OS devices
+        source_file = "bonus1_ex4.txt"
+        dest_file = source_file
+        agg_result = nr.run(
+            netmiko_file_transfer,
+            source_file=source_file,
+            dest_file=dest_file,
+            direction="put",
+        )
+        print_result(agg_result)
 
-    agg_result = nr.run(task=delete_file, filename=source_file)
-    print_result(agg_result)
+        agg_result = nr.run(task=delete_file, filename=source_file)
+        print_result(agg_result)

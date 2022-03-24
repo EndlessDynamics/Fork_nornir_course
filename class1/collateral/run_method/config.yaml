@@ -1,0 +1,9 @@
+# No concurrency
+# runner:
+#  plugin: serial
+
+# 10-Concurrent Threads 
+runner:
+  plugin: threaded
+  options:
+    num_workers: 10

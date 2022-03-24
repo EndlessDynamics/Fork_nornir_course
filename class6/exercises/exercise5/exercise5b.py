@@ -2,9 +2,9 @@ import os
 import random
 from netmiko.ssh_exception import NetMikoAuthenticationException
 from nornir import InitNornir
-from nornir.plugins.functions.text import print_result
-from nornir.plugins.tasks import networking
 from nornir.core.exceptions import NornirSubTaskError
+from nornir_utils.plugins.functions import print_result
+from nornir_netmiko import netmiko_send_command
 
 
 BAD_PASSWORD = "bogus"
@@ -14,7 +14,7 @@ def send_command(task):
     command_mapper = {"junos": "show system uptime"}
     cmd = command_mapper.get(task.host.platform, "show clock")
     try:
-        task.run(task=networking.netmiko_send_command, command_string=cmd)
+        task.run(task=netmiko_send_command, command_string=cmd)
     except NornirSubTaskError as e:
         if isinstance(e.result.exception, NetMikoAuthenticationException):
             # Remove the failed task (so ultimately the Nornir print output is cleaner)
@@ -22,14 +22,8 @@ def send_command(task):
 
             # For failed devices reset the password to the correct value using environment var
             task.host.password = os.environ["NORNIR_PASSWORD"]
-
-            # Force Nornir to close stale connections
-            try:
-                task.host.close_connections()
-            except ValueError:
-                pass
-
-            task.run(task=networking.netmiko_send_command, command_string=cmd)
+            # Try again (with the correct password)
+            task.run(task=netmiko_send_command, command_string=cmd)
         else:
             return f"Unhandled exception: {e}"
 

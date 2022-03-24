@@ -2,9 +2,12 @@ from nornir import InitNornir
 
 
 def main():
-    nr = InitNornir(config_file="config.yaml")
-    # Using 'export NORNIR_CORE_NUM_WORKERS=10' (number of workers should now be 10)
-    print(f"\nNumber of workers: {nr.config.core.num_workers}\n")
+    nr = InitNornir(config_file="config1c.yaml")
+
+    # New Nornir 3.x format
+    # export NORNIR_RUNNER_OPTIONS='{"num_workers": 100}'
+    workers = nr.config.runner.options
+    print(f"\nNumber of workers: {workers['num_workers']}\n")
 
 
 if __name__ == "__main__":

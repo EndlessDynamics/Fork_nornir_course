@@ -1,10 +1,10 @@
 from nornir import InitNornir
-from nornir.plugins.tasks.networking import netmiko_file_transfer
+from nornir_netmiko import netmiko_file_transfer
 
 
 def file_copy(task):
     # Obtain the group_name
-    group_name = task.host.groups[0]
+    group_name = task.host.groups[0].name
 
     # Set the filename based on the platform (ios, eos, et cetera)
     base_file = "test_file1.txt"
@@ -38,4 +38,4 @@ def file_copy(task):
 if __name__ == "__main__":
 
     nr = InitNornir(config_file="config.yaml")
-    results = nr.run(task=file_copy, num_workers=10)
+    results = nr.run(task=file_copy)

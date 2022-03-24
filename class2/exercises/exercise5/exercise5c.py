@@ -1,8 +1,9 @@
 import os
+from rich import print
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir.plugins.functions.text import print_result
-from nornir.plugins.tasks.networking import netmiko_send_command
+from nornir_utils.plugins.functions import print_result
+from nornir_netmiko import netmiko_send_command
 
 
 def main():
@@ -23,13 +24,7 @@ def main():
     # Re-set password back to valid value
     nr.inventory.hosts["cisco3"].password = os.environ["NORNIR_PASSWORD"]
 
-    # Nornir doesnt reset connection for failed hosts causing issues
-    print(nr.inventory.hosts["cisco3"].connections)
-    try:
-        nr.inventory.hosts["cisco3"].close_connections()
-    except ValueError:
-        pass
-
+    # Re-run only on failed hosts
     print()
     my_results = nr.run(
         task=netmiko_send_command,

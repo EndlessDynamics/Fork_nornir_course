@@ -1,7 +1,8 @@
 logging:
-  enabled: True
+  enabled: False
+
 inventory:
-  plugin: nornir.plugins.inventory.simple.SimpleInventory
+  plugin: SimpleInventory
   options:
     host_file: "hosts.yaml"
     group_file: "~/nornir_inventory/groups.yaml"

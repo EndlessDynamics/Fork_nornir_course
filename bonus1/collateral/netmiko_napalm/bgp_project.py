@@ -1,9 +1,11 @@
+import time
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir.plugins.tasks import text
-from nornir.plugins.tasks.networking import napalm_configure
-from nornir.plugins.tasks.networking import netmiko_send_command
-from nornir.plugins.functions.text import print_result
+
+from nornir_utils.plugins.functions import print_result
+from nornir_jinja2.plugins.tasks import template_file
+from nornir_napalm.plugins.tasks import napalm_configure
+from nornir_netmiko import netmiko_send_command
 
 
 DEBUG = False
@@ -12,7 +14,7 @@ DEBUG = False
 def render_configs(task):
     """Generate BGP configs from Jinja2 template."""
     template = "bgp.j2"
-    result = task.run(task=text.template_file, template=template, path=".", **task.host)
+    result = task.run(task=template_file, template=template, path=".", **task.host)
     rendered_config = result[0].result
     task.host["rendered_config"] = rendered_config
 
@@ -79,12 +81,17 @@ Verified BGP Route Count...OK
 
 
 if __name__ == "__main__":
-    nr = InitNornir(config_file="config.yaml")
-    eos_filter = F(groups__contains="eos")
-    eos_devices = nr.filter(eos_filter)
-    result = eos_devices.run(task=render_configs, num_workers=10)
-    print_result(result)
-    result = eos_devices.run(task=napalm_merge_cfg, num_workers=10)
-    print_result(result)
-    result = eos_devices.run(task=verify_bgp, num_workers=10)
-    print_result(result)
+    with InitNornir(config_file="config.yaml") as nr:
+        eos_filter = F(groups__contains="eos")
+        eos_devices = nr.filter(eos_filter)
+        result = eos_devices.run(task=render_configs)
+        print_result(result)
+        result = eos_devices.run(task=napalm_merge_cfg)
+        print_result(result)
+        # BGP might take some time to reach Established State
+        print("-" * 80)
+        print("Sleeping 60 Seconds...")
+        print("-" * 80)
+        time.sleep(60)
+        result = eos_devices.run(task=verify_bgp)
+        print_result(result)

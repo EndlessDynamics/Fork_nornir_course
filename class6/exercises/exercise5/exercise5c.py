@@ -6,15 +6,15 @@ from ansible.cli import CLI
 from ansible.parsing.dataloader import DataLoader
 from netmiko.ssh_exception import NetMikoAuthenticationException
 from nornir import InitNornir
-from nornir.plugins.functions.text import print_result
-from nornir.plugins.tasks import networking
 from nornir.core.exceptions import NornirSubTaskError
+from nornir_utils.plugins.functions import print_result
+from nornir_netmiko import netmiko_send_command
 
 
 BAD_PASSWORD = "bogus"
 # Encrypted YAML file
 VAULT_FILE = "vaulted_password.yaml"
-VAULT_PASSWORD = os.environ.get("NORNIR_VAULT_PASSWORD", "bogus")
+VAULT_PASSWORD = os.environ["NORNIR_VAULT_PASSWORD"]
 
 
 def decrypt_vault(
@@ -51,7 +51,7 @@ def send_command(task):
     command_mapper = {"junos": "show system uptime"}
     cmd = command_mapper.get(task.host.platform, "show clock")
     try:
-        task.run(task=networking.netmiko_send_command, command_string=cmd)
+        task.run(task=netmiko_send_command, command_string=cmd)
     except NornirSubTaskError as e:
         if isinstance(e.result.exception, NetMikoAuthenticationException):
             task.results.pop()
@@ -59,11 +59,7 @@ def send_command(task):
                 filename=VAULT_FILE, vault_password=VAULT_PASSWORD
             )
             task.host.password = vault_contents["password"]
-            try:
-                task.host.close_connections()
-            except ValueError:
-                pass
-            task.run(task=networking.netmiko_send_command, command_string=cmd)
+            task.run(task=netmiko_send_command, command_string=cmd)
         else:
             return f"Unhandled exception: {e}"
 

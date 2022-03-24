@@ -1,6 +1,7 @@
+from rich import print
 from nornir import InitNornir
 from nornir.core.filter import F
-from nornir.plugins.tasks.networking import netmiko_send_command
+from nornir_netmiko import netmiko_send_command
 
 
 def main():
